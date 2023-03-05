@@ -9,7 +9,7 @@ from sqlalchemy import (
 )
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from NewsSpider.utils.date_utils import timedelta_hours
+from NewsSpider.utils.date_utils import timedelta_minutes
 from NewsSpider.db.db_models import News, session, gen_web_url_md5
 from NewsSpider.log import logging, logger
 
@@ -33,7 +33,7 @@ def add_news_to_db(item):
     except Exception as e:
         session.rollback()
         logger.error('add_news_to_db', str(e))
-        traceback.print_exc()
+        # traceback.print_exc()
     finally:
         session.close()
 
@@ -46,10 +46,11 @@ def get_web_urls(source, last_update_time):
 
 
 def test_db():
-    source = "demo.com"
-    last_update_time = timedelta_hours(-2)
-    web_urls = get_web_urls(source, last_update_time)
-    print('web_urls', web_urls)
+    # source = "demo.com"
+    # last_update_time = timedelta_minutes(-2)
+    # web_urls = get_web_urls(source, last_update_time)
+    # print('web_urls', web_urls)
+    pass
 
 
 if __name__ == "__main__":

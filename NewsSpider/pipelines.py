@@ -12,3 +12,4 @@ from NewsSpider.db.db_service import add_news_to_db
 class NewsspiderPipeline:
     def process_item(self, item, spider):
         add_news_to_db(item)
+        return item

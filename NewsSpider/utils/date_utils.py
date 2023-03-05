@@ -17,7 +17,13 @@ def parse_datetime(source):
         match = re.search(r'\d{2}-\d{2} \d{2}:\d{2}', source)
         if match is not None:
             today = datetime.datetime.now()
-            return datetime.datetime.strptime(str(today.year) + '-' + match.group(), '%Y-%m-%d %H:%M')
+            maybe_date = datetime.datetime.strptime(str(today.year) + '-' + match.group(), '%Y-%m-%d %H:%M')
+            if maybe_date > today:
+                return datetime.datetime.strptime(str(today.year - 1) + '-' + match.group(), '%Y-%m-%d %H:%M')
+            return maybe_date
+        match = re.search(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}', source)
+        if match is not None:
+            return datetime.datetime.strptime(match.group(), '%Y-%m-%dT%H:%M:%S')
     except Exception as e:
         print('parse_datetime error', str(e))
 
@@ -51,17 +57,19 @@ def date_to_str(date):
     return None
 
 
-def timedelta_hours(hours):
-    return datetime.datetime.now() + datetime.timedelta(hours=hours)
+def timedelta_minutes(minutes):
+    return datetime.datetime.now() + datetime.timedelta(minutes=minutes)
 
 
 def test():
     s = "Jason's birthday is on 1991-09-21 18:22:21"
     s = "Jason's birthday is on 1991-09-21 18:22"
-    s = "Jason's birthday is on 09-21 18:22"
+    s = "Jason's birthday is on 02-21 18:22"
+    # s = "Jason's birthday is on 2023-03-04T22:38:03.004Z"
     # s = "Jason's birthday is on 1991-09-21"
-    print(parse_str_get_date(s))
-    print(timedelta_hours(-2))
+    # print(parse_str_get_date(s))
+    # print(timedelta_minutes(-2))
+    pass
 
 
 if __name__ == '__main__':

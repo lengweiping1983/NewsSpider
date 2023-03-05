@@ -22,9 +22,10 @@ def join_list(content_list, pattern='\r\n'):
 
 
 def test():
-    content = ' \r\n\t\t\t\t\r\n\t\t\t'
-    print('content', content)
-    print('result', remove_blank(content))
+    # content = ' \r\n\t\t\t\t\r\n\t\t\t'
+    # print('content', content)
+    # print('result', remove_blank(content))
+    pass
 
 
 if __name__ == '__main__':

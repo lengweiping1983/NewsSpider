@@ -192,5 +192,5 @@ if __name__ == "__main__":
     Base.metadata.drop_all(engine)
     # 创建表
     Base.metadata.create_all(engine)
-    test_db()
+    # test_db()
     pass

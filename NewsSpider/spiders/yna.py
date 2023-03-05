@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from NewsSpider.items import NewsItem
-from NewsSpider.utils.date_utils import parse_str_get_date, date_to_str, timedelta_hours
+from NewsSpider.utils.date_utils import parse_str_get_date, date_to_str, timedelta_minutes
 from NewsSpider.utils.str_utils import remove_blank, remove_blank_line, join_list
 from NewsSpider.db.db_service import get_web_urls
 from NewsSpider.log import logger
+from NewsSpider.settings import INCREMENTAL_UPDATE
 
 
 class YnaSpider(scrapy.Spider):
@@ -12,8 +13,11 @@ class YnaSpider(scrapy.Spider):
     allowed_domains = ["yna.co.kr"]
     start_urls = ["https://www.yna.co.kr"]
 
-    max_hours = 10 * 24
-    last_update_time = timedelta_hours(hours=-max_hours)
+    if INCREMENTAL_UPDATE:
+        max_minutes = 60 * 24
+    else:
+        max_minutes = 60 * 24 * 30 * 6
+    last_update_time = timedelta_minutes(minutes=-max_minutes)
 
     all_request_urls = set()
 
@@ -60,7 +64,7 @@ class YnaSpider(scrapy.Spider):
 
     def parse_list(self, response):
         logger.info('parse_list {}'.format(response.url))
-        jump = False
+        jump = True
 
         main_category = response.meta['main_category']
         category = response.meta['category']
@@ -98,6 +102,7 @@ class YnaSpider(scrapy.Spider):
 
                 detail_page_url = item['web_url']
                 if self.add_url(detail_page_url):
+                    jump = False
                     yield scrapy.Request(url=detail_page_url, callback=self.parse_detail, meta={'item_obj': item})
 
         if not jump:
@@ -114,6 +119,11 @@ class YnaSpider(scrapy.Spider):
         logger.info('parse_detail {}'.format(response.url))
         item_obj = response.meta['item_obj']
         content_list = []
+
+        date = response.xpath('//*[@id="newsUpdateTime01"]').extract_first()
+        if date is not None:
+            publish_time = parse_str_get_date(date)
+            item_obj['publish_time'] = date_to_str(publish_time)
 
         if len(content_list) == 0:
             body = response.xpath('//article[contains(@class,"story-news")]')

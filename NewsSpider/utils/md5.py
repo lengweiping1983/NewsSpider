@@ -11,7 +11,8 @@ def get_md5(source):
 
 def test_md5():
     source = "123456"
-    print(get_md5(source))
+    # print(get_md5(source))
+    pass
 
 
 if __name__ == "__main__":

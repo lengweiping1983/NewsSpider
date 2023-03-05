@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from NewsSpider.items import NewsItem
-from NewsSpider.utils.date_utils import parse_str_get_date, date_to_str, timedelta_hours
+from NewsSpider.utils.date_utils import parse_str_get_date, date_to_str, timedelta_minutes
 from NewsSpider.utils.url_utils import page_num_add_add
 from NewsSpider.utils.str_utils import remove_blank, remove_blank_line, join_list
 from NewsSpider.db.db_service import get_web_urls
 from NewsSpider.log import logger
+from NewsSpider.settings import INCREMENTAL_UPDATE
 
 
 class KbsSpider(scrapy.Spider):
@@ -14,9 +15,12 @@ class KbsSpider(scrapy.Spider):
     lang_url = "lang=k"
     start_urls = ["http://world.kbs.co.kr/service/index.htm?" + lang_url]
 
-    max_pages = 20
-    max_hours = 10 * 24
-    last_update_time = timedelta_hours(hours=-max_hours)
+    max_pages = 30
+    if INCREMENTAL_UPDATE:
+        max_minutes = 60 * 24
+    else:
+        max_minutes = 60 * 24 * 365 * 7
+    last_update_time = timedelta_minutes(minutes=-max_minutes)
 
     all_request_urls = set()
 
@@ -51,7 +55,7 @@ class KbsSpider(scrapy.Spider):
 
     def parse_list(self, response):
         logger.info('parse_list {}'.format(response.url))
-        jump = False
+        jump = True
 
         contents = response.xpath('//*[@id="container"]/div')
         main_category = contents.xpath('h1/text()').extract_first()
@@ -99,6 +103,7 @@ class KbsSpider(scrapy.Spider):
 
                 detail_page_url = item['web_url']
                 if self.add_url(detail_page_url):
+                    jump = False
                     yield scrapy.Request(url=detail_page_url, callback=self.parse_detail, meta={'item_obj': item})
 
         if not jump:

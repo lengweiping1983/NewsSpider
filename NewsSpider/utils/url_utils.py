@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from urllib.parse import parse_qs, urlencode, urlsplit
+from urllib.parse import parse_qs, urlencode, urlsplit, unquote, quote
 
 
 def page_num_add_add(url, param, init_value=1, max_value=-1):
@@ -22,7 +22,10 @@ def get_url_path(url):
     if url is None:
         return url
     parsed = urlsplit(url)
-    return parsed.path
+    url_path = parsed.path
+    if url_path[-1] == '/':
+        return url_path[:-1]
+    return url_path
 
 
 def get_url_query_dict(url):
@@ -38,11 +41,13 @@ def test():
     # url = 'http://world.kbs.co.kr/service/news_list.htm?page=2&lang=c'
     # print(page_num_add_add(url, 'page', 2))
 
-    url = 'https://www.yna.co.kr/view/AKR20230220064900056?section=lifestyle/travel-festival'
-    url_path = get_url_path(url)
-    query_dict = get_url_query_dict(url)
-    print(url_path)
-    print(query_dict)
+    # url = 'https://www.yna.co.kr/view/AKR20230220064900056?section=lifestyle/travel-festival'
+    # url_path = get_url_path(url)
+    # query_dict = get_url_query_dict(url)
+    # print(url_path)
+    # print(query_dict)
+
+    pass
 
 
 if __name__ == '__main__':

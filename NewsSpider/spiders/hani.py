@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from NewsSpider.items import NewsItem
-from NewsSpider.utils.date_utils import parse_str_get_date, date_to_str, timedelta_hours
+from NewsSpider.utils.date_utils import parse_str_get_date, date_to_str, timedelta_minutes
 from NewsSpider.utils.str_utils import remove_blank, remove_blank_line, join_list
 from NewsSpider.db.db_service import get_web_urls
 from NewsSpider.log import logger
+from NewsSpider.settings import INCREMENTAL_UPDATE
 
 
 class HaniSpider(scrapy.Spider):
@@ -12,8 +13,11 @@ class HaniSpider(scrapy.Spider):
     allowed_domains = ["hani.co.kr"]
     start_urls = ["https://www.hani.co.kr/arti"]
 
-    max_hours = 10 * 24
-    last_update_time = timedelta_hours(hours=-max_hours)
+    if INCREMENTAL_UPDATE:
+        max_minutes = 60 * 24
+    else:
+        max_minutes = 60 * 24 * 30 * 6
+    last_update_time = timedelta_minutes(minutes=-max_minutes)
 
     all_request_urls = set()
 
@@ -41,7 +45,7 @@ class HaniSpider(scrapy.Spider):
 
     def parse_list(self, response):
         logger.info('parse_list {}'.format(response.url))
-        jump = False
+        jump = True
 
         contents = response.xpath('//*[@id="section-left-scroll-in"]')
         articles = contents.xpath('div/div/div[contains(@class,"article-area")]')
@@ -76,6 +80,7 @@ class HaniSpider(scrapy.Spider):
 
                 detail_page_url = item['web_url']
                 if self.add_url(detail_page_url):
+                    jump = False
                     yield scrapy.Request(url=detail_page_url, callback=self.parse_detail, meta={'item_obj': item})
 
         if not jump:
