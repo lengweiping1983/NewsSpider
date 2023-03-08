@@ -4,43 +4,25 @@ from NewsSpider.items import NewsItem
 from NewsSpider.utils.date_utils import parse_str_get_date, date_to_str, timedelta_minutes
 from NewsSpider.utils.url_utils import page_num_add_add
 from NewsSpider.utils.str_utils import remove_blank, remove_blank_line, join_list
-from NewsSpider.db.db_service import get_web_urls
 from NewsSpider.log import logger
 from NewsSpider.settings import INCREMENTAL_UPDATE
+from NewsSpider.spiders.base import BaseSpider
 
 
-class KbsSpider(scrapy.Spider):
+class KbsSpider(BaseSpider):
     name = "kbs"
     allowed_domains = ["world.kbs.co.kr", "news.kbs.co.kr"]
     lang_url = "lang=k"
     start_urls = ["http://world.kbs.co.kr/service/index.htm?" + lang_url]
 
-    max_pages = 30
-    if INCREMENTAL_UPDATE:
-        max_minutes = 60 * 24
-    else:
+    if not INCREMENTAL_UPDATE:
         max_minutes = 60 * 24 * 365 * 7
-    last_update_time = timedelta_minutes(minutes=-max_minutes)
-
-    all_request_urls = set()
-
-    def __init__(self):
-        for url in self.start_urls:
-            self.all_request_urls.add(url)
-        web_urls = get_web_urls(self.name, self.last_update_time)
-        for url in web_urls:
-            self.all_request_urls.add(url)
+        last_update_time = timedelta_minutes(minutes=-max_minutes)
 
     def check_url(self, request_url):
         if request_url.find(self.allowed_domains[0]) > 0 and \
                 request_url.find(self.lang_url) > 0 \
                 and request_url.find("_list.htm") > 0:
-            return True
-        return False
-
-    def add_url(self, request_url):
-        if request_url not in self.all_request_urls:
-            self.all_request_urls.add(request_url)
             return True
         return False
 

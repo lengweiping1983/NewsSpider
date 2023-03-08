@@ -3,41 +3,14 @@ import scrapy
 from NewsSpider.items import NewsItem
 from NewsSpider.utils.date_utils import parse_str_get_date, date_to_str, timedelta_minutes
 from NewsSpider.utils.str_utils import remove_blank, remove_blank_line, join_list
-from NewsSpider.db.db_service import get_web_urls
 from NewsSpider.log import logger
-from NewsSpider.settings import INCREMENTAL_UPDATE
+from NewsSpider.spiders.base import BaseSpider
 
 
-class YnaSpider(scrapy.Spider):
+class YnaSpider(BaseSpider):
     name = "yna"
     allowed_domains = ["yna.co.kr"]
     start_urls = ["https://www.yna.co.kr"]
-
-    if INCREMENTAL_UPDATE:
-        max_minutes = 60 * 24
-    else:
-        max_minutes = 60 * 24 * 30 * 6
-    last_update_time = timedelta_minutes(minutes=-max_minutes)
-
-    all_request_urls = set()
-
-    def __init__(self):
-        for url in self.start_urls:
-            self.all_request_urls.add(url)
-        web_urls = get_web_urls(self.name, self.last_update_time)
-        for url in web_urls:
-            self.all_request_urls.add(url)
-
-    def check_url(self, request_url):
-        if request_url.find(self.allowed_domains[0]) > 0:
-            return True
-        return False
-
-    def add_url(self, request_url):
-        if request_url not in self.all_request_urls:
-            self.all_request_urls.add(request_url)
-            return True
-        return False
 
     def parse(self, response):
         logger.info('parse {}'.format(response.url))

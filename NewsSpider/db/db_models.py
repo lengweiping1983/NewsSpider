@@ -68,7 +68,6 @@ class OnlineStatus(Enum):
 
 
 class News(Base):
-    # 数据库中存储的表名
     __tablename__ = "n_news"
     # 对于必须插入的字段，采用nullable=False进行约束，它相当于NOT NULL
     id = Column(Integer, primary_key=True, autoincrement=True, comment="id")
@@ -107,6 +106,29 @@ class News(Base):
 
     def __str__(self):
         return f"object : <id:{self.id} title:{self.title}>"
+
+
+class Category(Base):
+    __tablename__ = "n_category"
+    id = Column(Integer, primary_key=True, autoincrement=True, comment="id")
+    code = Column(String(255), nullable=False, index=True, comment="code")
+    name = Column(String(255), nullable=False, index=True, comment="name")
+    status = Column(Integer, default=0, comment="status")
+
+    def __str__(self):
+        return f"object : <id:{self.id} name:{self.name}>"
+
+
+class CategoryMapping(Base):
+    __tablename__ = "n_category_mapping"
+    id = Column(Integer, primary_key=True, autoincrement=True, comment="id")
+
+    source = Column(String(32), comment="source")
+    source_main_category = Column(String(64), nullable=False, index=True, comment="source_main_category")
+    category = Column(String(255), nullable=False, index=True, comment="category")
+
+    def __str__(self):
+        return f"object : <id:{self.id} source_main_category:{self.source_main_category}>"
 
 
 def gen_web_url_md5(obj):
